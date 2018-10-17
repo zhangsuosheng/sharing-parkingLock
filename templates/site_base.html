@@ -1,0 +1,24 @@
+{% extends "theme_base.html" %}
+
+{% load metron_tags %}
+{% load i18n %}
+{% load inbox %}
+
+{% block nav %}
+    {% if user.is_authenticated %}
+        <ul class="nav pull-left">{% spaceless %}
+            <li id="tab_wall"><a href="/wall/wall/">{% trans "Wall" %}</a></li>
+            <li id="tab_map"><a href="/mapview/">{% trans "Map" %}</a></li>
+            <li id="tab_map"><a href="/resources/">{% trans "Resources" %}</a></li>
+         {% endspaceless %}</ul>
+    {% endif %}
+{% endblock %}
+
+{% block footer %}
+    {% include "_footer.html" %}
+{% endblock %}
+
+{% block extra_body_base %}
+    {% analytics %}
+    {% block extra_body %}{% endblock %}
+{% endblock %}

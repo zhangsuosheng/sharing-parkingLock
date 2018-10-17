@@ -1,0 +1,180 @@
+{% extends "site_base.html" %}
+
+{% load i18n %}
+{% load bootstrap_tags %}
+{% load pagination_tags %}
+
+{% block head_title %}{{ block.super }}: {{ wall.name }}{% endblock %}
+
+{% block body %}
+
+<!--<h2 align="center">{{ wall.name }}</h2>-->
+<div class="alert-message">
+  <a class="close" data-dismiss="alert">×</a>
+	Post to the wall for advice, or share events and resources with others
+</div>
+<div class="form-toggle">    
+    <p><span id="post-to-wall-toggle" class="btn primary large">{% trans "Post to the wall" %}</span></p>
+    <div id="post-to-wall" style="display:none">
+    <form method="POST" class="uniForm" enctype="multipart/form-data" action="{% url add_wall_item wall.slug %}">{% csrf_token %}
+            <fieldset class="control-group">
+    		<div class="row wallitem-form-controls">
+    		<div class="span10">
+       			{{ form.posting }}
+       			<p><i>Use the editor to add links; no embedded html allowed.</i></p>
+       		</div>
+       		<div class="span2">
+       			<p>{{ form.img.label}}</p>
+       			{{ form.img }}
+       		</div>
+    		</div>
+			</fieldset>
+            <input type="submit" class="btn primary large" value="{% trans 'Submit' %}" />
+        </form>
+    </div>
+    
+</div>
+
+<hr/>
+
+{% autoescape off %}
+{% if items %}
+{% autopaginate items 20 %}
+{% for item in items %}
+	<div class="wallitem deleteable">
+	<div class="row">
+	<div class="span1">
+	<div class="profile-pic">
+	
+	{% if item.author.get_profile.profile_pic_small  %}
+    	<p><img src="{{ item.author.get_profile.profile_pic_small.url }}"/></p>
+    {% else %}	
+    	<p><em>no profile picture yet</em></p>
+    {% endif %}
+    
+    {% if item.author == request.user or request.user.is_superuser %}
+    <div class="delete-button">
+    	<a id="delete-item{{item.id}}" href="{% url delete_wall_item item.id %}" class="btn small delete-item delete-confirm-required">delete</a>
+	</div>
+	{% endif %}
+    
+	</div>
+	</div>
+	
+    <div class="span8">
+   			<b>{{ item.author.get_profile.name }}</b>, <i>{{ item.created_at }}  </i><span id="comment-toggle{{item.id}}" class="btn small comment-toggle">comment</span>
+   			<p>{{ item.body }}</p>
+	<div class="row">
+    <div id="comments{{item.id}}" class="span7 offset1 comments">
+    
+    {% for comment in item.active_comments_set reversed %}
+    	<div id="comment{{comment.id}}" class="comment well deleteable">
+    	<b>{{ comment.author.get_profile.name }}</b>, <i>{{ comment.created_at }}</i>{{ comment.body }}
+    	
+    	{% if comment.author == request.user or request.user.is_superuser  %}
+    	<div class="delete-button">
+    		<a id="delete-comment{{item.id}}" href="{% url delete_wall_comment comment.id %}"  class="delete-comment delete-confirm-required">delete</a>
+		</div>
+		{% endif%}
+    	
+    	</div>
+    {% endfor %}
+    
+    </div>
+    </div>
+
+    <div class="row">
+    <div class="span7 offset1">
+    
+    <div id="comment-form{{item.id}}" class="comment-form" style="display:none">
+    <form method="POST" action="{% url add_wall_comment item.id %}" >{% csrf_token %}
+		
+       		<fieldset class="control-group">
+    		<div class="comment-form-controls">
+       			{{ commentform.comment }}
+       			{{ commentform.comment.help_text }}
+    		</div>
+			</fieldset>
+			
+			<div id="comment-error{{item.id}}" class="comment-error" style="display:none">
+    		</div>
+			<br />
+            <input type="hidden" id="id_submit_url{{item.id}}"  class="submit_url" value="{% url add_wall_comment item.id %}" />
+            <input type="hidden" id="id_object_pk{{item.id}}" class="object_pk" value="{{ item.id }}" />
+            <input id="submit-comment" type="submit" class="btn primary small" value="{% trans 'Post comment' %}" />
+     </form>
+    </div>
+    </div>
+    </div>
+      
+	</div>
+	
+	{% if item.item_pic_resized  %}
+	<div class="span3">
+		<a id="imgModal{{item.id}}" href="{% url view_wall_image item.id %}" class="modal-link">
+   			<img src="{{ item.item_pic_resized.url }}"/>
+   		</a> 		
+	</div>
+
+    {% endif %}	
+    
+	</div>
+	<hr/>	
+	</div>	
+{% endfor %}
+{% paginate %}
+{% endif %}
+{% endautoescape %}
+{% endblock %}
+
+{% block extra_body_scripts %}
+
+	<script type="text/javascript" src="{{ STATIC_URL }}/js/ckeditor/ckeditor.js"></script>
+	<script type="text/javascript" src="{{ STATIC_URL }}/js/wall/deleteconfirm.js"></script>
+	<script type="text/javascript" src="{{ STATIC_URL }}/js/wall/comments.js"></script>
+
+    <script type="text/javascript">
+   
+        $(document).ready(function() {
+            
+            $('#post-to-wall').hide();
+            $('#post-to-wall-toggle').click(function() {
+                $('#post-to-wall').toggle();
+                $('#post-to-wall').autoscroll();
+                $('#id_posting').focus();
+                return false;
+            });
+        });
+    </script>
+    
+    <script type="text/javascript">
+		window.onload = function()
+		{
+			CKEDITOR.replace('id_posting', {
+					toolbar : 'Basic'
+				});
+		};
+	</script>
+	
+	<script>
+		$('a.modal-link').each( function(index) {
+        	$(this).modal({
+             backdrop: true,
+          	})
+        });
+    </script>
+    
+    <script>
+    $(document).ready(function() {
+   		$("a[href^=http]").each(function(){
+      	if(this.href.indexOf(location.hostname) == -1) {
+         $(this).attr({
+            target: "_blank",
+            title: "Opens in a new window"
+         });
+      }
+   	})
+	});
+	</script>
+	
+{% endblock %}

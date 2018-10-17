@@ -1,0 +1,38 @@
+{% extends "django_messages/base.html" %} 
+{% load i18n %} 
+{% block body %}
+<h1>{% trans "View Message" %}</h1>
+<div class="message-headers">
+	<table>
+	<tr>
+    <td>{% trans "Subject" %}</td>
+    <td><strong>{{ message.subject }}</strong></td>
+    </tr>
+    <tr>
+    <td>{% trans "From" %}</td>
+    <td>{{ message.sender.get_profile.name }}</td>
+    </tr>
+    <tr>
+    <td>{% trans "To:" %}</td>
+    <td>{{ message.recipient.get_profile.name }}</td>
+    </tr>
+    <tr>
+    <td>{% trans "Date" %} </td>
+    <td>{{ message.sent_at|date:_("DATETIME_FORMAT")}}</td>
+    </tr>
+    </table>
+</div>
+<div class="message-body well">
+{{ message.body|linebreaksbr }}
+</div>
+<div class="row">
+<div class="span1">
+{% ifequal message.recipient.pk user.pk %}
+<a href="{% url messages_reply message.id %}" class="btn">{% trans "Reply" %}</a>
+{% endifequal %}
+</div>
+<div class="span1 offset9">
+<a href="{% url messages_delete message.id %}" class="btn danger">{% trans "Delete" %}</a>
+</div>
+</div>
+{% endblock %}

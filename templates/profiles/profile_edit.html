@@ -1,0 +1,16 @@
+{% extends "profiles/base.html" %}
+
+{% load i18n %}
+
+{% block head_title %}{% trans "Edit Profile" %}{% endblock %}
+{% block extra_head %}
+<script src="http://maps.google.com/maps?file=api&amp;v=2&amp;sensor=false&amp;key={{API_KEY}}" type="text/javascript"></script>
+{% endblock %}
+{% block body_onload%}load_location(){% endblock %}
+{% block body %}
+    
+    <h1>{% trans "Edit Profile" %}</h1>
+    
+    {% include "profiles/_profile_form.html" %}
+   
+{% endblock %}

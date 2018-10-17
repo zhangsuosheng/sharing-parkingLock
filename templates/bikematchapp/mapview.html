@@ -1,0 +1,31 @@
+{% extends "site_base.html" %}
+
+{% load i18n %}
+{% load ifsetting_tag %}
+
+{% block head_title %}{% trans "Welcome" %}{% endblock %}
+
+{% block body %}
+<div class"span12">
+<div class="alert-message">
+  <a class="close" data-dismiss="alert">×</a>
+	Click an icon to see that users' profile
+</div>
+
+</div>
+<div id="mapdiv">
+{{ form.map }}
+{{ form.media.js }}
+</div>
+		<script type="text/javascript">
+
+            window.myobj = {
+                markerOver: function() { this.openInfoWindow(); },
+                markerOut: function() { this.closeInfoWindow(); },
+                onClick: function() {
+								profile_username = this.profile_username ;
+								window.location = '../profiles/profile/'+ profile_username;
+           		 				},
+                 };
+        </script>
+{% endblock %}

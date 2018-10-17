@@ -1,0 +1,14 @@
+[
+
+    {
+        "pk": 1, 
+        "model": "wall.wall", 
+        "fields": {
+               	"name" : "wall",
+    			"slug" : "wall",
+    			"max_items" : 100,
+    			"max_item_length" : 1000,
+   				"allow_html" : true
+        }
+    }
+]
